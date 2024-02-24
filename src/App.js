@@ -58,6 +58,14 @@ function reducer(state, action) {
         status: "finished",
         highscore: state.points > state.highscore ? state.points : state.highscore
       }
+    case "restart":
+    return {
+      ...state,
+      status: "ready",
+      index: 0,
+      answer: null,
+      points: 0,
+    }
     default:
       throw new Error("Invalid action type")
   }
@@ -115,6 +123,7 @@ export default function App() {
           points={points} 
           maxPoints={maxPoints}
           highscore={highscore}
+          dispatch={dispatch}
           />}
      </Main>
     </div>
