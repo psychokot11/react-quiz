@@ -8,6 +8,10 @@ import Question from "./components/Question";
 import NextButton from "./components/NextButton";
 import ProgressBar from "./components/ProgressBar";
 import FinishScreen from "./components/FinishScreen";
+import Footer from "./components/Footer";
+import Timer from "./components/Timer";
+
+const SECS_PER_QUESTION = 30;
 
 const initialState = {
   questions: [],
@@ -15,7 +19,8 @@ const initialState = {
   index: 0,
   answer: null,
   points: 0,
-  highscore: 0
+  highscore: 0,
+  remainingSeconds: null
 }
 
 function reducer(state, action) {
@@ -34,7 +39,8 @@ function reducer(state, action) {
     case "start":
       return {
         ...state,
-        status: "active"
+        status: "active",
+        remainingSeconds: state.questions.length * SECS_PER_QUESTION
       }
     case "newAnswer":
       const question = state.questions.at(state.index);
@@ -56,23 +62,29 @@ function reducer(state, action) {
       return {
         ...state,
         status: "finished",
-        highscore: state.points > state.highscore ? state.points : state.highscore
+        highscore: state.points > state.highscore ? state.points : state.highscore,
       }
     case "restart":
-    return {
-      ...state,
-      status: "ready",
-      index: 0,
-      answer: null,
-      points: 0,
-    }
+      return {
+        ...state,
+        status: "ready",
+        index: 0,
+        answer: null,
+        points: 0,
+      }
+    case "tick":
+      return {
+        ...state,
+        remainingSeconds: state.remainingSeconds - 1,
+        status: state.remainingSeconds === 0 ? "finished" : state.status
+      }
     default:
       throw new Error("Invalid action type")
   }
 }
 
 export default function App() {
-  const [{ questions, status, index, answer, points, highscore }, dispatch] = useReducer(reducer, initialState);
+  const [{ questions, status, index, answer, points, highscore, remainingSeconds }, dispatch] = useReducer(reducer, initialState);
   const numQuestions = questions.length;
   const maxPoints = questions.reduce((prev, curr) => prev + curr.points, 0);
 
@@ -110,12 +122,16 @@ export default function App() {
             question={questions[index]}
             answer={answer} 
             dispatch={dispatch} />
-          <NextButton 
-            dispatch={dispatch} 
-            answer={answer}
-            index={index}
-            numQuestions={numQuestions} 
-            />
+          <Footer>
+            <Timer 
+              remainingSeconds={remainingSeconds}
+              dispatch={dispatch} />
+            <NextButton 
+              dispatch={dispatch} 
+              answer={answer}
+              index={index}
+              numQuestions={numQuestions} />
+          </Footer>
         </>
       }
       {status === "finished" &&
