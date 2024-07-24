@@ -1,6 +1,8 @@
 import React from 'react';
+import { useQuiz } from "../contexts/QuizContext";
 
-function ProgressBar({ index, numQuestions, points, maxPoints, answer }) {
+function ProgressBar() {
+  const { index, numQuestions, points, maxPoints, answer } = useQuiz();
   return (
     <header className='progress'>
         <progress max={numQuestions} value={index + Number(answer !== null)} />
